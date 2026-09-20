@@ -1,0 +1,72 @@
+
+📝 Problem Recap
+=================
+Table: Person
+
+personId (PK), lastName, firstName
+
+Table: Address
+
+addressId (PK), personId, city, state
+
+Task: Return firstName, lastName, city, state for every person.
+If a person has no address, show NULL for city and state.
+
+Explanation:
+===========
+LEFT JOIN ensures all rows from Person are included.
+If no matching personId exists in Address, the columns city and state return NULL.
+This matches the requirement: show all people, even without addresses.
+
+🔑 Key Concepts Learned
+=========================
+LEFT JOIN → Keeps all rows from left table (Person), adds matching rows from right table (Address), fills NULL if no match.
+Primary Key vs Foreign Key → personId is the link between tables.
+NULL handling → Important for interview-style SQL queries.
+
+
+🚀 Beginner Tips for SQL on LeetCode
+========================================
+Always read schema carefully (PK, FK relationships).
+Practice different joins: INNER, LEFT, RIGHT, FULL.
+Try writing queries without aliases first, then add aliases (p, a) for readability.
+Use sample inputs/outputs to debug your query.
+
+ANSWER
+=======
+SELECT p.firstName, p.lastName, a.city, a.state FROM Person p
+LEFT JOIN Address a ON p.personId = a.personId;
+
+=========================================================================================================================================================================
+
+LEFT JOIN
+==========
+
+A SQL LEFT JOIN returns all rows from the left table and only the matching rows from the right table; 
+if no match exists, the right table’s columns are filled with NULL. This makes it useful when you want 
+to preserve every record from a primary table while optionally including related data. 
+
+
+🔑 How LEFT JOIN Works
+=======================
+Left table (primary): All rows are always included.
+Right table (secondary): Only rows that match the join condition are included.
+No match case: Columns from the right table show NULL.
+
+
+⚙️ When to Use LEFT JOIN
+===========================
+User profiles → Show all users, even if they lack optional details.
+Sales reports → Include all products, even those with zero sales.
+Data completeness checks → Identify records missing related entries.
+
+Syntax
+=======
+SELECT column_name(s) FROM table1 LEFT JOIN table2 ON table1.column_name = table2.column_name;
+
+
+
+
+
+
+

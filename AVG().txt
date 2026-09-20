@@ -1,0 +1,56 @@
+
+AVG() is an aggregate function in SQL that calculates the numerical average (arithmetic mean) of a set of values in a specific column.
+
+Syntax
+=======
+AVG(expression)
+
+expression: The numeric column or calculation you want to average.
+
+Key Behavior: <---------IMPORTANT
+**********************************
+AVG() automatically ignores NULL values when computing the mean. 
+It calculates total sum divided by the count of non-NULL rows.
+
+Basic Example
+=================
+Suppose you have an Employees table:
+
+employee_id,department,salary
+1,IT,5000
+2,IT,7000
+3,HR,4000
+4,HR,NULL
+
+To calculate the overall average salary across all employees:
+
+SELECT AVG(salary) AS avg_salary 
+FROM Employees;
+
+Result: 5333.33
+
+(Calculated as (5000 + 7000 + 4000) / 3. 
+The NULL row for employee 4 is ignored in both the sum and the row count.)
+
+Common Usage Patterns
+==================================
+1. Grouped Calculations (GROUP BY)
+Calculate averages per category or department:
+
+SELECT department, AVG(salary) AS avg_dept_salary
+FROM Employees
+GROUP BY department;
+
+2. Conditional Averaging (Combining AVG with CASE)
+Calculate conditional rates (like calculating percentages or conversion rates):
+
+SELECT AVG(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) AS success_rate
+FROM Orders;
+
+
+
+
+
+
+
+

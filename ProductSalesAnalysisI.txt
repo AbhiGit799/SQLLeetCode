@@ -1,0 +1,121 @@
+/*
+
+1070. Product Sales Analysis III
+
+Table: Sales
+
++-------------+-------+
+| Column Name | Type  |
++-------------+-------+
+| sale_id     | int   |
+| product_id  | int   |
+| year        | int   |
+| quantity    | int   |
+| price       | int   |
++-------------+-------+
+(sale_id, year) is the primary key (combination of columns with unique values) of this table.
+Each row records a sale of a product in a given year.
+A product may have multiple sales entries in the same year.
+Note that the per-unit price.
+
+Write a solution to find all sales that occurred in the first year each product was sold.
+
+For each product_id, identify the earliest year it appears in the Sales table.
+
+Return all sales entries for that product in that year.
+
+Return a table with the following columns: product_id, first_year, quantity, and price.
+Return the result in any order.
+
+ 
+
+Example 1:
+
+Input: 
+Sales table:
++---------+------------+------+----------+-------+
+| sale_id | product_id | year | quantity | price |
++---------+------------+------+----------+-------+ 
+| 1       | 100        | 2008 | 10       | 5000  |
+| 2       | 100        | 2009 | 12       | 5000  |
+| 7       | 200        | 2011 | 15       | 9000  |
++---------+------------+------+----------+-------+
+
+Output: 
++------------+------------+----------+-------+
+| product_id | first_year | quantity | price |
++------------+------------+----------+-------+ 
+| 100        | 2008       | 10       | 5000  |
+| 200        | 2011       | 15       | 9000  |
++------------+------------+----------+-------+
+
+
+*/
+
+Lesson Learnt
+==============
+🔍 What Happens Here
+MIN(year) → correctly finds the earliest year for each product_id.
+
+But then you also select quantity and price without aggregating them.
+In SQL, when you use GROUP BY, every column in the SELECT list must either:
+
+be part of the GROUP BY, or
+
+be wrapped in an aggregate function (like MIN(), MAX(), SUM(), etc.).
+
+👉 Because quantity and price are not aggregated, most SQL engines will throw an error (Oracle, PostgreSQL, SQL Server). 
+
+Note
+======
+The subquery (f) finds the earliest year for each product.
+The main table (s) contains all sales records.
+The JOIN condition (ON s.product_id = f.product_id AND s.year = f.first_year) ensures we only keep rows where the sale year matches the product’s first year.
+Because we used JOIN without specifying otherwise, it defaults to INNER JOIN — meaning only rows that satisfy the condition in both tables are returned.
+
+⚖️ Key Point
+=============
+INNER JOIN → returns only matching rows (used here to filter sales to the first year).
+If we had used LEFT JOIN, we’d also get products with no matching sales in the first year (which doesn’t make sense here).
+So INNER JOIN is the correct choice.
+
+Solution using Inner JOIN
+==========================
+
+select s.product_id,s.year AS first_year,s.quantity,s.price
+from Sales s
+INNER JOIN
+(select product_id,min(year) as first_year from sales group by product_id) f
+on s.product_id = f.product_id and s.year = f.first_year;
+
+Window functions
+=================
+SELECT product_id,
+       year AS first_year,
+       quantity,
+       price
+FROM (
+    SELECT product_id,
+           year,
+           quantity,
+           price,
+           ROW_NUMBER() OVER (
+               PARTITION BY product_id
+               ORDER BY year
+           ) AS rn
+    FROM Sales
+)
+WHERE rn = 1;
+
+
+
+
+
+
+
+
+
+
+
+
+

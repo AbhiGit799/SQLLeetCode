@@ -1,0 +1,59 @@
+ROUND() in Oracle SQL is a math function used to round a number to a specified number of decimal places or to round dates to a specific unit (like day, month, or year).
+
+1. Numeric ROUND()
+********************
+
+Syntax
+======
+ROUND(number, [ decimal_places ])
+
+number: The numeric value or column to round.
+
+decimal_places: (Optional) The number of decimal places to round to:
+
+Positive number: Rounds to that many places to the right of the decimal point.
+
+Zero (0) or omitted: Rounds to the nearest integer.
+
+Negative number: Rounds to that many places to the left of the decimal point (e.g., tens, hundreds).
+
+
+Examples
+========
+SELECT 
+    ROUND(125.786, 2)  AS round_two,     -- 125.79
+    ROUND(125.786, 0)  AS round_zero,    -- 126
+    ROUND(125.786)     AS round_default, -- 126 (omitted defaults to 0)
+    ROUND(125.786, -1) AS round_tens,    -- 130
+    ROUND(125.786, -2) AS round_hundreds -- 100
+FROM dual;
+
+
+
+2. Date ROUND()
+*****************
+
+Oracle also allows you to round date values to the nearest unit of time (e.g., midnight, month start, or year start).
+
+Syntax
+======
+ROUND(date, [ format_unit ])
+
+SELECT 
+    -- Rounds to the nearest midnight
+    ROUND(TO_DATE('2026-09-06 15:30:00', 'YYYY-MM-DD HH24:MI:SS')) AS round_day, 
+    -- Result: 2026-09-07 00:00:00 (past 12 PM rolls to next day)
+
+    -- Rounds to the start of the nearest month
+    ROUND(TO_DATE('2026-09-20', 'YYYY-MM-DD'), 'MM') AS round_month,
+    -- Result: 2026-10-01 (past the 15th rolls to next month)
+
+    -- Rounds to the start of the nearest year
+    ROUND(TO_DATE('2026-04-10', 'YYYY-MM-DD'), 'YEAR') AS round_year
+    -- Result: 2026-01-01 (before July 1 rolls to current year start)
+FROM dual;
+
+
+
+
+

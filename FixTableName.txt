@@ -1,0 +1,75 @@
+/*
+
+Table: Users
+
++----------------+---------+
+| Column Name    | Type    |
++----------------+---------+
+| user_id        | int     |
+| name           | varchar |
++----------------+---------+
+user_id is the primary key (column with unique values) for this table.
+This table contains the ID and the name of the user. The name consists of only lowercase and uppercase characters.
+ 
+
+Write a solution to fix the names so that only the first character is uppercase and the rest are lowercase.
+
+Return the result table ordered by user_id.
+
+The result format is in the following example.
+
+ 
+
+Example 1:
+
+Input: 
+Users table:
++---------+-------+
+| user_id | name  |
++---------+-------+
+| 1       | aLice |
+| 2       | bOB   |
++---------+-------+
+Output: 
++---------+-------+
+| user_id | name  |
++---------+-------+
+| 1       | Alice |
+| 2       | Bob   |
++---------+-------+
+
+
+*/
+
+SELECT user_id, 
+       UPPER(SUBSTR(name, 1, 1)) || LOWER(SUBSTR(name, 2)) AS name
+FROM Users
+ORDER BY user_id;
+
+============================================================================================================================
+
+Why This Works
+
+SUBSTR(name, 1, 1): Extracts the first character.
+UPPER(...): Forces the first letter to uppercase.
+SUBSTR(name, 2): Extracts the rest of the string.
+LOWER(...): Forces the remaining letters to lowercase.
+||: Recombines the parts safely into one string.
+
+============================================================================================================================
+
+The query failed because INITCAP capitalizes every word in a string, 
+but the problem requires only the very first character of the entire name to be uppercase.
+As shown in your test case, MArrY aNN contains a space. 
+INITCAP turned it into Marry Ann, but the LeetCode system expected Marry ann (with a lowercase 'a').
+
+
+
+
+
+
+
+
+
+
+

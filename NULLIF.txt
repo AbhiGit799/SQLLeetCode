@@ -1,0 +1,45 @@
+📖 Definition
+NULLIF(expr1, expr2)
+
+Compares two values.
+
+If they are equal, it returns NULL.
+
+If they are not equal, it returns the first value (expr1).
+
+Think of it as:
+👉 “If these two things are the same, give me nothing (NULL). Otherwise, give me the first thing.”
+
+🍎 Simple Example
+Imagine a table of students with their marks:
+
+student	marks
+A	90
+B	0
+
+
+Now suppose you want to calculate average marks, but you don’t want to divide by zero.
+SELECT student,
+       100 / NULLIF(marks, 0) AS result
+FROM Students;
+
+
+
+Step-by-step:
+For student A: marks = 90 → NULLIF(90, 0) = 90 → 100 / 90 = 1.11.
+
+For student B: marks = 0 → NULLIF(0, 0) = NULL → 100 / NULL = NULL (safe, no error).
+
+✅ Why It’s Useful
+Prevents division by zero errors.
+
+Often combined with COALESCE to replace NULL with a default value (like 0).
+
+So in plain words:
+👉 NULLIF says “if the denominator is zero, make it NULL instead of crashing.”
+
+
+
+
+
+

@@ -1,0 +1,115 @@
+🔑 What is DENSE_RANK()?
+Purpose: Assigns a ranking number to rows based on an ORDER BY clause, but without skipping numbers when ties occur.
+
+Syntax:
+DENSE_RANK() OVER ( [PARTITION BY column] ORDER BY column ASC|DESC )
+
+PARTITION BY (optional): Groups rows (e.g., by department).
+
+ORDER BY (required): Defines ranking order (e.g., by salary).
+
+📊 Example with Employees Table
+================================
+SELECT first_name, last_name, salary,
+       DENSE_RANK() OVER (ORDER BY salary DESC) AS salary_rank
+FROM employees;
+
+
+Output (simplified):
+====================
+
+Employee	Salary	Rank
+Alice	     9000	1
+Bob	         9000	1
+Charlie	     8000	2
+Diana	     7000	3
+
+ Charlie gets rank 2 (not 3), because DENSE_RANK() keeps ranks consecutive even after ties.
+
+⚖️ Difference from RANK()
+===========================
+RANK() → Skips numbers after ties (Alice & Bob tie at 1, Charlie becomes 3).
+
+DENSE_RANK() → No gaps; ranks remain consecutive (Alice & Bob tie at 1, Charlie becomes 2).
+
+⚠️ Beginner Tips
+Use DENSE_RANK() when you want continuous ranking without gaps.
+
+Use RANK() when you want to reflect real-world competition (like Olympic medals).
+
+Always pair with ORDER BY inside OVER() — otherwise Oracle won’t know how to rank rows.
+
+===================================================================================================================================================================
+
+📌 Query-Based Interview Questions & Answers
+***********************************************
+Q1: Find the top 3 highest-paid employees
+Query:
+SELECT first_name, last_name, salary
+FROM (
+  SELECT first_name, last_name, salary,
+         RANK() OVER (ORDER BY salary DESC) AS rnk
+  FROM employees
+)
+WHERE rnk <= 3;
+
+Answer:  
+Ranks employees by salary and filters only those with rank ≤ 3. Handles ties correctly.
+
+
+
+Q2: Find the second-highest salary in the company
+SELECT salary
+FROM (
+  SELECT salary,
+         DENSE_RANK() OVER (ORDER BY salary DESC) AS rnk
+  FROM employees
+)
+WHERE rnk = 2;
+
+Answer:  
+Uses DENSE_RANK() to avoid gaps and fetches the second-highest salary even if multiple employees share it.
+
+
+Q3: Rank employees within each department by salary
+Query:
+
+SELECT department_id, first_name, salary,
+       RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS dept_rank
+FROM employees;
+
+Answer:  
+Partitions data by department, ranking employees separately within each group.
+
+
+Q4: Show employees who are top earners in their department
+Query:
+SELECT department_id, first_name, salary
+FROM (
+  SELECT department_id, first_name, salary,
+         RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS dept_rank
+  FROM employees
+)
+WHERE dept_rank = 1;
+
+Answer:  
+Filters only employees with rank 1 in their department — useful for identifying departmental leaders.
+
+
+Q5: Compare RANK(), DENSE_RANK(), and ROW_NUMBER() outputs
+Query:
+SELECT first_name, salary,
+       RANK() OVER (ORDER BY salary DESC) AS rnk,
+       DENSE_RANK() OVER (ORDER BY salary DESC) AS dense_rnk,
+       ROW_NUMBER() OVER (ORDER BY salary DESC) AS row_num
+FROM employees;
+
+Answer:
+
+RANK() → skips numbers after ties.
+
+DENSE_RANK() → no gaps, consecutive ranks.
+
+ROW_NUMBER() → unique sequence, no ties.
+
+

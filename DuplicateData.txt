@@ -1,0 +1,130 @@
+Given:
+
+id	email
+1	a@gmail.com
+2	b@gmail.com
+3	a@gmail.com
+4	c@gmail.com
+5	b@gmail.com
+
+==================================================================================================================================
+
+If you only want the duplicate email IDs
+
+SELECT email FROM Person GROUP BY email HAVING COUNT(*) > 1;
+
+This returns:
+
+a@gmail.com
+b@gmail.com
+
+==================================================================================================================================
+
+Yes — in general Oracle SQL, "delete duplicate records" depends on what makes a record a duplicate and which record you want to retain.
+
+1. General pattern — delete duplicates, keep one
+
+Suppose:
+
+Employee
++----+-------+--------+
+| id | name  | dept   |
++----+-------+--------+
+| 1  | John  | IT     |
+| 2  | John  | IT     |  <-- duplicate
+| 3  | Mary  | HR     |
+| 4  | John  | IT     |  <-- duplicate
++----+-------+--------+
+
+If (name, dept) defines a duplicate and you want to keep one row:
+
+
+DELETE FROM Employee
+WHERE ROWID NOT IN (
+    SELECT MIN(ROWID)
+    FROM Employee
+    GROUP BY name, dept
+);
+
+Here:
+
+GROUP BY name, dept
+
+defines what "duplicate" means.
+
+MIN(ROWID) identifies the one physical row to keep.
+
+==================================================================================================================================
+
+2. If you have a primary key and want to keep the smallest ID
+
+This is generally preferable when id uniquely identifies each row:
+
+DELETE FROM Employee e
+WHERE e.id > (
+    SELECT MIN(e2.id)
+    FROM Employee e2
+    WHERE e2.name = e.name
+      AND e2.dept = e.dept
+);
+
+==================================================================================================================================
+
+
+3. A very useful Oracle approach: ROW_NUMBER()
+
+For more complex duplicate rules, I usually recommend:
+
+DELETE FROM Employee
+WHERE ROWID IN (
+    SELECT rid
+    FROM (
+        SELECT ROWID rid,
+               ROW_NUMBER() OVER (
+                   PARTITION BY name, dept
+                   ORDER BY id
+               ) rn
+        FROM Employee
+    )
+    WHERE rn > 1
+);
+
+Meaning:
+
+PARTITION BY name, dept   → what constitutes a duplicate
+ORDER BY id               → which row should be kept
+rn = 1                    → keep
+rn > 1                    → delete
+
+This approach is particularly useful when you have more complicated requirements, such as:
+
+"If multiple records have the same customer and product, keep the most recent record and delete the others."
+
+You would simply change:
+
+ORDER BY created_date DESC
+Important
+
+Before executing a DELETE, it's good practice to run the inner query as a SELECT first to verify exactly which rows will be deleted.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

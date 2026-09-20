@@ -1,0 +1,11 @@
+🔍 If Your Oracle Version < 12c
+Older Oracle doesn’t support FETCH FIRST. Use ROWNUM instead:
+
+
+
+
+
+
+
+
+

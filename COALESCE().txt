@@ -1,0 +1,58 @@
+COALESCE() is an ANSI SQL standard function that evaluates a list of arguments f
+rom left to right and returns the first non-NULL value in that list. 
+If all arguments evaluate to NULL, it returns NULL.
+
+Syntax
+=======
+COALESCE(val1, val2, val3, ..., valN)
+
+val1, val2, ...: The values, columns, or expressions to evaluate in order.
+
+Key Requirement: All parameters must be of compatible data types (e.g., all numbers, or all character strings).
+
+
+Example
+========
+Suppose you have a Contacts table where users can provide a primary phone, secondary phone, or email for notifications:
+
+contact_id      phone_primary      phone_secondary       email
+1               555-0100           555-0101              test@example.com
+2               NULL               555-0202              user@example.com
+3               NULL               NULL                  admin@example.com
+4               NULL               NULL                  NULL
+
+To find the best available contact method for each row, use COALESCE:
+
+SELECT 
+    contact_id,
+    COALESCE(phone_primary, phone_secondary, email, 'No Contact Info Provided') AS preferred_contact
+FROM Contacts;
+
+Result:
+========
+contact_id         preferred_contact
+1                  555-0100
+2                  555-0202
+3                  admin@example.com
+4                  No Contact Info Provided
+
+
+Key Differences: COALESCE() vs. NVL()
+====================================
+ANSI Standard vs. Oracle Specific: COALESCE() is standard SQL supported by virtually all database 
+engines (PostgreSQL, MySQL, SQL Server, Oracle), while NVL() is specific to Oracle.
+
+Number of Arguments: NVL() takes exactly 2 arguments (NVL(expr1, expr2)). COALESCE() can take 2 or more arguments
+
+Short-Circuit Evaluation: COALESCE() uses short-circuit logic, 
+meaning it stops evaluating as soon as it finds the first non-NULL argument, 
+whereas NVL() always evaluates both arguments before returning.
+
+
+
+
+
+
+
+
+

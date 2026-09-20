@@ -1,0 +1,161 @@
+/*
+180. Consecutive Numbers
+
+Table: Logs
+
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| num         | varchar |
++-------------+---------+
+In SQL, id is the primary key for this table.
+id is an autoincrement column starting from 1.
+ 
+
+Find all numbers that appear at least three times consecutively.
+
+Return the result table in any order.
+
+The result format is in the following example.
+
+ 
+
+Example 1:
+
+Input: 
+Logs table:
++----+-----+
+| id | num |
++----+-----+
+| 1  | 1   |
+| 2  | 1   |
+| 3  | 1   |
+| 4  | 2   |
+| 5  | 1   |
+| 6  | 2   |
+| 7  | 2   |
++----+-----+
+Output: 
++-----------------+
+| ConsecutiveNums |
++-----------------+
+| 1               |
++-----------------+
+
+Explanation: 1 is the only number that appears consecutively for at least three times.
+
+*/
+
+
+/* Write your PL/SQL query statement below */
+
+Solution => 1
+**************
+SELECT DISTINCT num as ConsecutiveNums 
+FROM
+(
+    SELECT num,
+        LAG(num,1) OVER (ORDER BY id) AS prev1,
+        LAG(num,2) OVER (ORDER BY id) AS prev2
+    FROM Logs
+) t
+WHERE num = prev1 AND num = prev2;
+
+Solution => 2
+***************
+SELECT DISTINCT num AS ConsecutiveNums
+FROM (
+    SELECT num,
+           LEAD(num,1) OVER (ORDER BY id) AS next1,
+           LEAD(num,2) OVER (ORDER BY id) AS next2
+    FROM Logs
+) t
+WHERE num = next1 AND num = next2;
+
+
+/*
+
+1. Inner Query
+We select each num along with:
+prev1 → the value of num in the previous row.
+prev2 → the value of num two rows back.
+This is done using the LAG function.
+
+
+2. Outer Query
+We filter rows where:
+num = prev1 AND num = prev2.
+Meaning: the current number is the same as the last two numbers → so we’ve found three consecutive identical values.
+DISTINCT ensures we don’t return duplicates.
+
+
+🔍 What Are LAG and LEAD?
+===========================
+LAG(column, offset): Looks backwards in the result set.
+LAG(num,1) → value of num in the previous row.
+LAG(num,2) → value of num two rows before.
+
+LEAD(column, offset): Looks forward in the result set.
+LEAD(num,1) → value of num in the next row.
+LEAD(num,2) → value of num two rows ahead.
+
+Both are analytic functions in Oracle SQL that let you peek at neighboring rows without doing self‑joins.
+
+
+
+
+
+
+🔍 Explanation
+===============
+LEAD(column, offset) → looks forward in the result set.
+LEAD(num,1) → value of num in the next row.
+LEAD(num,2) → value of num two rows ahead.
+
+We compare the current num with the next two rows:
+If num = next1 AND num = next2, then we’ve found three consecutive identical numbers.
+DISTINCT ensures we only return each qualifying number once.
+
+
+🚀 Approach Summary
+=====================
+With LAG, we look backward to check the previous two rows.
+With LEAD, we look forward to check the next two rows.
+Both approaches solve the same problem, just from opposite directions.
+
+*/
+
+
+
+🧩 The Role of OVER (ORDER BY id)
+===================================
+When you use analytic functions like LAG or LEAD, you must tell Oracle how to look at the rows. 
+That’s what the OVER clause does.
+
+OVER → defines the “window” of rows the function can see.
+
+ORDER BY id → tells Oracle to arrange the rows by id before applying the function.
+Since id is auto‑incrementing, this ensures we’re looking at rows in the natural sequence they were inserted.
+
+
+🧩 What OVER Does
+The OVER clause is what makes a function an analytic (window) function.
+It tells Oracle: “Don’t just look at one row — look at a set of rows (a window) and apply the function across them.”
+
+🔍 Why It’s Needed
+Without OVER, functions like LAG, LEAD, ROW_NUMBER, RANK, etc. wouldn’t know:
+Which rows to compare.
+In what order to move forward or backward.
+Whether to restart calculations for groups.
+
+
+🧩 What OVER Does
+The OVER clause turns a function into a window (analytic) function.
+It defines the "window" of rows the function can see and how it should process them.
+
+
+
+
+
+

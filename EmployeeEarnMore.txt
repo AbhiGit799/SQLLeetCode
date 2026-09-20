@@ -1,0 +1,131 @@
+// Employees Earning More Than Their Managers
+
+Example 1:
+
+Input: 
+Employee table:
++----+-------+--------+-----------+
+| id | name  | salary | managerId |
++----+-------+--------+-----------+
+| 1  | Joe   | 70000  | 3         |
+| 2  | Henry | 80000  | 4         |
+| 3  | Sam   | 60000  | Null      |
+| 4  | Max   | 90000  | Null      |
++----+-------+--------+-----------+
+Output: 
++----------+
+| Employee |
++----------+
+| Joe      |
++----------+
+
+Explanation: Joe is the only employee who earns more than his manager.
+
+Ans => 
+select e.name as Employee from Employee e JOIN Employee m 
+ON e.managerId = m.id where e.managerId IS NOT NULL AND e.salary > m.salary
+
+==================================================================================================================================
+
+
+
+🔑 Key Takeaways
+===================
+Use a self join to compare employees with their managers.
+Always handle NULL values explicitly in queries.
+Filtering with IS NOT NULL ensures only valid manager relationships are checked.
+
+Employees e → represents the employee.
+Employees m → represents the manager (self-join).
+ON e.ManagerID = m.EmployeeID → links each employee to their manager.
+WHERE e.Salary > m.Salary → filters only those employees earning more than their manager.
+
+
+Why add e.ManagerID IS NOT NULL?
+=================================
+If ManagerID is NULL, the JOIN won’t find a matching manager row anyway.
+Adding the condition makes the intent explicit: only compare employees who actually have managers
+
+
+🔑 Meaning
+============
+e → alias for the employee row.
+m → alias for the manager row (from the same Employees table).
+e.ManagerID → the ID of the manager assigned to the employee.
+m.EmployeeID → the unique ID of the manager in the table.
+
+So, e.ManagerID = m.EmployeeID means:
+👉 “Match each employee’s manager ID with the actual manager’s employee ID.”
+
+
+🚀 Why It’s Important
+=======================
+Without this condition, the database wouldn’t know how to connect employees to their managers.
+It’s the relationship bridge in a self-join.
+It enables hierarchical queries like org charts.
+It allows comparisons like salary checks.
+It’s the same principle used in parent-child relationships in tables (e.g., categories, file systems).
+
+
+==================================================================================================================================
+
+SELF-JOIN
+==========
+
+📖 Definition
+A self join is a regular SQL join where a table is joined with itself.
+It’s used when rows in the same table are related to each other — 
+for example, employees and their managers, categories and subcategories, or parent-child relationships.
+
+📝 Syntax
+==========
+select e.column_name,m.column_name 
+
+FROM TableName e
+
+JOIN
+
+TableName m
+
+ON
+
+e.related_column = m.related_column
+
+
+
+🚀 Key Takeaways
+==================
+A self join lets you compare rows within the same table.
+It’s often used for hierarchies (employees → managers, categories → subcategories).
+You use aliases (e, m) to treat the same table as if it were two different ones.
+
+
+🧩 Beginner-Friendly Explanation
+===================================
+Imagine you have one big table called Employees.
+Inside it, you store both employees and managers. 
+Managers are also employees, so they live in the same table.
+
+Each employee has a column ManagerID that points to their manager’s EmployeeID.
+To compare employees with their managers, you need to look at the same table twice:
+
+Once as the employee side (e)
+Once as the manager side (m)
+
+That’s why we call it a self join — the table joins with itself.
+
+
+| EmployeeID | Name     | Salary | ManagerID |
+| ---        | ---      | ---    | --------- |
+| 1          | Alice    | 50000  | NULL      |
+| 2          | Bob      | 40000  | 1         |
+| 3          | Charlie  | 60000  | 1         |
+
+
+SELECT e.Name AS Employee, m.Name AS Manager
+FROM Employees e
+JOIN Employees m
+     ON e.ManagerID = m.EmployeeID;
+
+
+

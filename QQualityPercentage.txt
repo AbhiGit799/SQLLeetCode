@@ -1,0 +1,51 @@
+/*
+This one is LeetCode Problem 1211 – Queries Quality and Poor Queries Percentage. Let’s carefully build the solution.
+
+📝 Problem Setup
+==================
+We have a table Queries:
+query_name → the query’s name
+result → some result string (not relevant here)
+position → integer from 1 to 500
+rating → integer from 1 to 5
+
+Definitions:
+============
+Query quality = average of (rating / position) for that query_name.
+Poor query percentage = percentage of queries with rating < 3 for that query_name.
+Both must be rounded to 2 decimal places.
+
+
+🔍 Explanation
+================
+AVG(rating * 1.0 / position) → computes the average ratio for each query_name.
+SUM(CASE WHEN rating < 3 THEN 1 ELSE 0 END) → counts poor queries.
+COUNT(*) → total queries for that query_name.
+Multiply by 100.0 → convert to percentage.
+ROUND(..., 2) → round to two decimals.
+GROUP BY query_name → ensures results per query_name.
+
+🚀 Key Takeaways
+================
+Use aggregate functions with GROUP BY to avoid Oracle errors.
+Always cast to 1.0 when dividing integers to avoid integer division.
+CASE WHEN is the standard way to count conditional rows.
+
+*/
+
+
+Ans =>
+
+SELECT
+query_name,
+ROUND(AVG(rating*1.0/position),2) AS quality,
+ROUND(SUM(CASE WHEN rating<3 THEN 1 ELSE 0 END)*100.0/COUNT(*),2) AS poor_query_percentage
+FROM Queries
+GROUP BY query_name;
+
+
+
+
+
+
+

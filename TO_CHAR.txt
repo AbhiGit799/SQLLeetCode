@@ -1,0 +1,41 @@
+In Oracle, TO_CHAR() is a function that converts a date, number, or other datatype into a string using a format you specify. 
+It’s especially useful when you want to control how dates or numbers are displayed.
+
+
+🔑 General Syntax
+===================
+TO_CHAR(expression, format_mask)
+
+expression → the value you want to convert (often a DATE or NUMBER).
+
+format_mask → a string that tells Oracle how to format the output.
+
+
+⚖️ Key Takeaway
+================
+TO_CHAR() is a conversion + formatting tool.
+For dates → it controls how the date is displayed (removing time, changing format).
+For numbers → it controls decimal places, commas, currency symbols, etc.
+
+📅 Common Date Formatting
+============================
+When applied to a date column, TO_CHAR() lets you strip off the time or show the date in a specific style.
+
+Examples:
+TO_CHAR(activity_date, 'YYYY-MM-DD')   -- 2019-07-20
+TO_CHAR(activity_date, 'DD-MON-YYYY')  -- 20-JUL-2019
+TO_CHAR(activity_date, 'MM/DD/YYYY')   -- 07/20/2019
+TO_CHAR(activity_date, 'YYYY-MM-DD HH24:MI:SS') -- 2019-07-20 14:35:00
+
+
+👉 In your case, TO_CHAR(activity_date, 'YYYY-MM-DD') removes the 00:00:00 time portion and shows only the date.
+
+🔢 Number Formatting
+======================
+You can also use TO_CHAR() for numbers:
+
+TO_CHAR(12345.678, '99999.99')   -- 12345.68
+TO_CHAR(12345.678, '9,999.99')   -- 12,345.68
+
+
+

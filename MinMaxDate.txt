@@ -1,0 +1,50 @@
+🔑 Behavior
+MIN(date_column) → returns the earliest chronological date (smallest value).
+
+MAX(date_column) → returns the latest chronological date (largest value).
+
+This works because Oracle stores dates internally as numbers (days since a base date, with fractional parts for time), so comparisons are straightforward.
+
+
+📊 Example = Activity Table:
+
+player_id	event_date
+1	        2016-03-01
+1	        2016-03-02
+2	        2017-06-25
+3	        2016-03-02
+3	        2018-07-03
+
+
+SELECT MIN(event_date) AS earliest_date,
+       MAX(event_date) AS latest_date
+FROM Activity;
+
+
+Result:
+=========
+earliest_date	 latest_date
+2016-03-01	     2018-07-03
+
+
+⚖️ Key Point
+===============
+MIN() on dates → first/earliest date in the dataset.
+
+MAX() on dates → last/latest date in the dataset.
+
+If you use GROUP BY player_id, then you’ll get each player’s first login and last login dates.
+
+
+
+
+
+
+
+
+
+
+
+
+
+

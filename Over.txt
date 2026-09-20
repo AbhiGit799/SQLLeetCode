@@ -1,0 +1,120 @@
+Excellent focus, Arjun — let’s talk about **scenarios where we use the `OVER` keyword** in SQL.
+
+---
+
+## 🧩 What `OVER` Does
+The `OVER` clause turns a function into a **window (analytic) function**.  
+It defines the "window" of rows the function can see and how it should process them.
+
+---
+
+## 🎯 Common Scenarios for `OVER`
+
+- **Ranking rows**  
+  ```sql
+  SELECT id, num,
+         ROW_NUMBER() OVER (ORDER BY id) AS row_num
+  FROM Logs;
+  ```
+  → Assigns a sequential number to each row.
+
+- **Running totals**  
+  ```sql
+  SELECT id, num,
+         SUM(id) OVER (ORDER BY id) AS running_sum
+  FROM Logs;
+  ```
+  → Keeps a cumulative sum as you move down the rows.
+
+- **Moving averages**  
+  ```sql
+  SELECT id, num,
+         AVG(id) OVER (ORDER BY id ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS moving_avg
+  FROM Logs;
+  ```
+  → Calculates averages across a sliding window of rows.
+
+- **Previous/next row comparisons**  
+  ```sql
+  SELECT id, num,
+         LAG(num,1) OVER (ORDER BY id) AS prev_num,
+         LEAD(num,1) OVER (ORDER BY id) AS next_num
+  FROM Logs;
+  ```
+  → Lets you peek at neighboring rows without self‑joins.
+
+- **Partitioned calculations**  
+  ```sql
+  SELECT num,
+         COUNT(*) OVER (PARTITION BY num) AS count_per_num
+  FROM Logs;
+  ```
+  → Resets the window for each group (`num` here), so you can calculate per‑group totals or ranks.
+
+---
+
+## 🚀 Summary
+We use `OVER` whenever we want:
+- To **rank, number, or order rows**.
+- To **calculate cumulative or moving aggregates**.
+- To **compare a row with its neighbors** (`LAG`, `LEAD`).
+- To **apply functions within groups** (`PARTITION BY`).
+
+Think of `OVER` as the “lens” through which SQL looks at rows — it defines the scope and order for analytic functions.
+
+---
+
+
+
+The SQL query has a syntax error in the ROW_NUMBER() window function clause.
+
+In SQL, the OVER() clause requires an explicit PARTITION BY or ORDER BY specification. 
+Passing a column directly inside OVER (product_id) is invalid.
+
+
+=========================================================================================================================================
+
+**Yes, every window function requires an `OVER()` clause.**
+
+The `OVER()` clause is what transforms a regular function or aggregate into a window function. It tells the SQL engine:
+
+1. **How to divide the rows** into groups (`PARTITION BY`)
+2. **How to sequence the rows** within each group (`ORDER BY`)
+3. **Which subset of rows to include** relative to the current row (`ROWS` or `RANGE` frame)
+
+
+---
+
+### Functions Used With `OVER()`
+
+1. **Dedicated Window Functions** (Require `OVER()` exclusively):
+* Ranking: `ROW_NUMBER()`, `RANK()`, `DENSE_RANK()`, `NTILE()`
+* Value/Offset: `LAG()`, `LEAD()`, `FIRST_VALUE()`, `LAST_VALUE()`
+
+
+2. **Standard Aggregate Functions** (Can be used with or without `OVER()`):
+* `SUM()`, `AVG()`, `COUNT()`, `MIN()`, `MAX()`
+* **Without `OVER()**`: Collapse multiple rows into a single summary row (requires `GROUP BY`).
+* **With `OVER()**`: Keep all individual rows intact and attach the aggregated metric alongside each row (e.g., running totals).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

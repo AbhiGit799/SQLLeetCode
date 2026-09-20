@@ -1,0 +1,71 @@
+The CASE statement in SQL is a conditional expression that allows 
+you to add if-then-else logic to your queries. 
+It evaluates a list of conditions and returns a value when the first condition is met.
+
+Syntax
+======
+CASE 
+   WHEN condition1 THEN result1
+   WHEN condition2 THEN result2
+   ELSE default_result
+END
+
+WHEN condition: The boolean expression to test (e.g., score >= 90).
+THEN result: The value returned if the corresponding condition evaluates to TRUE.
+ELSE default_result: (Optional) The fallback value returned if none of the WHEN conditions are true. If omitted and no conditions match, it returns NULL.
+END: Closes the CASE statement.
+
+Basic Example
+===============
+Suppose you have a Students table:
+
+student_id    score
+1             92
+2             75
+3             50
+
+You can use CASE to assign letter grades based on scores:
+
+SELECT 
+ student_id,
+ score,
+ CASE 
+    WHEN score>=90 THEN 'A'
+    WHEN score>=70 THEN 'B'
+    ELSE 'F'
+ END AS grade
+FROM Students;
+
+
+Result:
+======
+student_id   score    grade
+1            92        A
+2            75        B
+3            50        F
+
+Common Use Cases
+=================
+1. Conditional Aggregation
+Combine CASE inside aggregate functions like SUM() or COUNT() to aggregate specific subsets of data:
+
+-- Count how many orders were 'Completed' vs 'Cancelled'
+SELECT 
+    SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS total_completed,
+    SUM(CASE WHEN status = 'Cancelled' THEN 1 ELSE 0 END) AS total_cancelled
+FROM Orders;
+
+2. Sorting Data dynamically (ORDER BY)
+Use CASE to customize the sorting order:
+
+-- Put 'VIP' customers first, then sort the rest by name
+SELECT customer_name, membership_type
+FROM Customers
+ORDER BY 
+    CASE WHEN membership_type = 'VIP' THEN 1 ELSE 2 END,
+    customer_name;
+
+
+
+
+

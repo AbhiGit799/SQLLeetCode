@@ -1,0 +1,88 @@
+To calculate a running total (also known as a cumulative sum) in Oracle SQL, 
+the most efficient and standard approach is to use the SUM() analytic window function combined with an OVER clause.
+
+In Oracle SQL there are several different ways to calculate a running total (cumulative sum). 
+
+
+
+⚖️ Comparison
+===============
+Approach	                   Pros                    	                  Cons
+Window function	              Fast, elegant, modern	                    Requires analytic function support
+Correlated subquery	          Simple, works everywhere	                Slow on large datasets
+Recursive CTE	              Good for hierarchical logic	            More complex, less efficient
+Temp table	                  Useful for ETL/reporting	                Extra steps, not inline
+
+🎯 Beginner Guidance
+=====================
+Always prefer window functions in Oracle — they’re efficient and readable.
+Use correlated subqueries only if you’re stuck on an older database or want to understand the basics.
+Explore recursive CTEs when learning advanced SQL patterns.
+Use temp tables when you need intermediate storage for reporting or ETL.
+
+1.) Window Functions (Preferred)
+*********************************
+SELECT 
+    person_id,
+    person_name,
+    weight,
+    SUM(weight) OVER (ORDER BY turn) AS running_total
+FROM Queue;
+
+Uses SUM() OVER (ORDER BY ...).
+
+Very efficient and readable.
+
+Best choice in Oracle 8i+ (analytic functions introduced).
+
+👉 This is the approach we used in your bus queue problem.
+
+2.)Correlated Subquery
+**********************
+SELECT q1.person_id,
+       q1.person_name,
+       q1.weight,
+       (SELECT SUM(q2.weight)
+        FROM Queue q2
+        WHERE q2.turn <= q1.turn) AS running_total
+FROM Queue q1
+ORDER BY q1.turn;
+
+For each row, we sum all previous rows (q2.turn <= q1.turn).
+
+Works in all Oracle versions.
+
+Less efficient on large tables (recomputes sums repeatedly).
+
+3. Recursive CTE (Oracle 11g+)
+********************************
+WITH RECURSIVE cumulative AS (
+    SELECT person_id, person_name, weight, turn, weight AS running_total
+    FROM Queue
+    WHERE turn = 1
+    UNION ALL
+    SELECT q.person_id, q.person_name, q.weight, q.turn,
+           c.running_total + q.weight
+    FROM Queue q
+    JOIN cumulative c ON q.turn = c.turn + 1
+)
+SELECT * FROM cumulative;
+
+Builds the cumulative sum step by step.
+
+Useful for learning recursion, but less efficient than window functions.
+
+
+4. Materialized View / Temp Table
+********************************
+CREATE GLOBAL TEMPORARY TABLE temp_queue AS
+SELECT person_id, person_name, weight, turn
+FROM Queue;
+
+-- Then compute cumulative sums with procedural logic (PL/SQL).
+
+Sometimes used when you need to persist intermediate results.
+
+More common in ETL or reporting pipelines.
+
+

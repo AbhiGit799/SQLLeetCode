@@ -1,0 +1,22 @@
+
+🔍 Key Notes
+=============
+FETCH FIRST 1 ROWS ONLY is cleaner and works in Oracle 12c and later.
+
+ROWNUM = 1 is the traditional Oracle approach for older versions. <-----------This will only work.
+
+Both queries ensure only the person with the most friends is returned.
+
+
+
+
+
+
+
+
+
+
+
+
+
+

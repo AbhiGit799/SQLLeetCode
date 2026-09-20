@@ -1,0 +1,60 @@
+🧩 What is a CTE?
+A CTE is like a temporary, named table that exists only while your query runs. 
+You define it with WITH ... AS (...) and then reference it in your main query.
+
+Think of it as writing your query in steps, instead of one giant block.
+
+
+🎯 When to Use a CTE (Beginner Guide)
+=======================================
+Break down complex queries  
+If your query has multiple nested subqueries, a CTE makes it easier to read and debug.
+
+Reuse intermediate results  
+You can reference the same CTE multiple times without repeating the logic.
+
+Improve readability  
+Instead of deeply nested parentheses, you can give each step a name (like SalesGrowth or HighEarners).
+
+Recursive queries  
+Perfect for hierarchical data (org charts, family trees, folder structures).
+
+Step-by-step calculations  
+Build one calculation at a time (e.g., first find yesterday’s sales, then percentage change).
+
+
+📊 Example: Without vs With CTE
+=================================
+❌ Without CTE (nested subquery mess)
+
+SELECT Name, Salary
+FROM (
+    SELECT EmployeeID, Name, Salary
+    FROM Employees
+    WHERE Salary > 50000
+) AS t;
+
+✅ With CTE (cleaner)
+======================
+WITH HighEarners AS (
+    SELECT EmployeeID, Name, Salary
+    FROM Employees
+    WHERE Salary > 50000
+)
+SELECT Name, Salary
+FROM HighEarners;
+
+🚀 Beginner Tips
+=================
+Use descriptive names for CTEs (e.g., LatestPrices, HighEarners).
+Don’t overuse them for very simple queries — they shine when queries get complex.
+Remember: CTEs only exist for the duration of the query (they’re not permanent tables).
+
+
+So the rule of thumb:
+👉 If your query feels too nested, repetitive, or unreadable, switch to a CTE.
+👉 If you need hierarchical recursion, CTEs are the go‑to tool.
+
+👉 CTE vs Subquery  
+👉 CTE vs Temp Table  
+👉 SQL readability tips

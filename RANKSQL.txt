@@ -1,0 +1,179 @@
+In Oracle SQL, the RANK() function calculates the rank of a value within a set of values. 
+When rows have identical values for the ranking criteria, 
+they receive the same rank, and Oracle skips subsequent ranks based on the number of tied rows (e.g., 1, 2, 2, 4)
+
+In Oracle SQL, the RANK() function is a window (analytic) function that assigns a 
+ranking number to each row based on an ORDER BY clause — but it allows ties and skips numbers when ties occur. 
+This makes it perfect for finding top-N or bottom-N results, like the highest salaries or best-selling products.
+
+🔑 Beginner-Friendly Explanation of RANK()
+============================================
+Purpose: Calculates the relative position of each row in a sorted list.
+
+Syntax:
+========
+RANK() OVER ( [PARTITION BY column] ORDER BY column ASC|DESC )
+
+PARTITION BY (OPTIONAL): Splits data into groups (e.g., by department).
+
+ORDER BY (REQUIRED): Defines how rows are ranked (e.g., by salary).
+
+OVER() (REQUIRED) : Ranking functions like RANK(), ROW_NUMBER(), and DENSE_RANK() require the OVER() keyword to define how the window functions compute.
+
+Important Note
+===============
+Ties Handling: If two rows have the same value, they get the same rank. The next rank is skipped.
+Example: If two employees tie for rank 1, the next employee will be rank 3 (not 2).
+
+The function can be used in two distinct ways: 
+1) As an Analytic Function (ranking existing rows) 
+or 
+2) As an Aggregate Function (calculating the rank of a hypothetical row).
+
+
+Difference from DENSE_RANK:
+============================
+1) RANK() → Skips numbers after ties.
+
+2) DENSE_RANK() → No gaps; ranks remain consecutive.
+
+⚠️ Key Beginner Tips
+=====================
+Use RANK() when you want to reflect real-world competition (like Olympic medals — if two golds are awarded, there’s no silver).
+Use DENSE_RANK() if you want consecutive numbering without gaps.
+Always include an ORDER BY clause inside OVER() — without it, Oracle won’t know how to rank rows.
+
+📊 Example with Employees Table
+==================================
+SELECT first_name, last_name, salary,
+       RANK() OVER (ORDER BY salary DESC) AS salary_rank
+FROM employees;
+
+Output (simplified):
+=====================
+Employee	Salary	Rank
+Alice	    9000	1
+Bob	        9000	1
+Charlie	    8000	3
+Diana	    7000	4
+
+👉 Notice how Charlie gets rank 3 because ranks 1 and 2 were taken by Alice and Bob (tie at 9000).
+
+
+Q1: What is the difference between RANK() and DENSE_RANK()?
+Answer:
+RANK() assigns the same rank to tied rows but skips the next rank.
+DENSE_RANK() also assigns the same rank to tied rows but does not skip numbers.
+👉 Example: If two employees tie for salary rank 1, RANK() gives the next employee rank 3, while DENSE_RANK() gives rank 2.
+
+
+Q2: How does RANK() handle ties in Oracle SQL?
+Answer:  
+When multiple rows have the same value in the ORDER BY clause, they receive the same rank. The next rank is incremented by the number of tied rows.
+👉 Example: Two employees with salary 9000 both get rank 1, and the next employee with salary 8000 gets rank 3.
+
+Q4: What is the difference between RANK() DESNSE_RANK() and ROW_NUMBER()?
+
+Function	         Purpose	                       Ties Handling	                     Numbering Style	        Example (Salaries: 9000, 9000, 8000, 7000)
+RANK()	             Assigns rank based on order	   Same rank for ties,                   Non-consecutive	           9000 → 1, 9000 → 1, 8000 → 3, 7000 → 4 
+                                                       skips next numbers	
+
+DENSE_RANK()	     Similar to RANK but no gaps	   Same rank for ties, 
+                                                       next rank is consecutive	             Consecutive	               9000 → 1, 9000 → 1, 8000 → 2, 7000 → 3
+
+ROW_NUMBER()	     Sequential numbering of rows	   No ties allowed, 
+                                                       each row unique	                     Strict sequence	           9000 → 1, 9000 → 2, 8000 → 3, 7000 → 4
+
+📊 Example Query
+SELECT first_name, salary,
+       RANK()        OVER (ORDER BY salary DESC) AS rnk,
+       DENSE_RANK()  OVER (ORDER BY salary DESC) AS dense_rnk,
+       ROW_NUMBER()  OVER (ORDER BY salary DESC) AS row_num
+FROM employees;
+
+
+Output (simplified):
+Employee	        Salary	RANK	DENSE_RANK	ROW_NUMBER
+Alice	           9000	     1	      1	         1
+Bob	               9000	     1	      1	         2
+Charlie	           8000	     3	      2	         3
+Diana	           7000	     4	      3	         4
+
+⚡ Interview Tip
+=================
+When asked this question:
+Emphasize ties handling (RANK skips, DENSE_RANK doesn’t, ROW_NUMBER ignores ties).
+Mention use cases:
+RANK() → competitions (Olympics style).
+DENSE_RANK() → reporting without gaps.
+ROW_NUMBER() → pagination or strict ordering.
+
+
+Q5: How can you use RANK() with PARTITION BY?
+Answer:
+
+SELECT department_id, first_name, salary,
+       RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS dept_rank
+FROM employees;
+
+👉 This query ranks employees within each department separately.
+
+Q6) 
+Use cases like top-N queries, departmental rankings, or competition scenarios.
+
+==================================================================================================================================================================
+
+📌 Query-Based Interview Questions & Answers
+===============================================
+
+Q1: Find the top 3 highest-paid employees using RANK()
+Query:
+SELECT first_name, last_name, salary
+FROM (
+  SELECT first_name, last_name, salary,
+         RANK() OVER (ORDER BY salary DESC) AS rnk
+  FROM employees
+)
+WHERE rnk <= 3;
+
+Answer:  
+This query ranks employees by salary in descending order and filters only those with rank ≤ 3. 
+If multiple employees tie for salary, they all appear in the result.
+
+
+Q2: Rank employees within each department by salary
+Query:
+SELECT department_id, first_name, salary,
+       RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS dept_rank
+FROM employees;
+
+Answer:  
+Here, PARTITION BY department_id ensures ranking is done separately for each department. 
+Useful for finding the top performer in each department.
+
+Q3: Show employees who are second-highest earners in their department
+Query:
+SELECT department_id, first_name, salary
+FROM (
+  SELECT department_id, first_name, salary,
+         RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS dept_rank
+  FROM employees
+)
+WHERE dept_rank = 2;
+
+Answer:  
+This query identifies employees who hold the second rank in salary within their department. 
+If multiple employees tie for second place, all are shown.
+
+
+🎯 Interview Tip
+==================
+When answering query-based questions:
+Always explain why you used RANK() instead of ROW_NUMBER() or DENSE_RANK().
+Mention real-world use cases (top-N queries, departmental rankings, competition scenarios).
+Be ready to write queries with both ORDER BY and PARTITION BY clauses.
+
+
+
+
+

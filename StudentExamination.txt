@@ -1,0 +1,240 @@
+/*
+
+Write a solution to find the number of times each student attended each exam.
+
+Return the result table ordered by student_id and subject_name.
+
+The result format is in the following example.
+
+ 
+
+Example 1:
+
+Input: 
+Students table:
++------------+--------------+
+| student_id | student_name |
++------------+--------------+
+| 1          | Alice        |
+| 2          | Bob          |
+| 13         | John         |
+| 6          | Alex         |
++------------+--------------+
+Subjects table:
++--------------+
+| subject_name |
++--------------+
+| Math         |
+| Physics      |
+| Programming  |
++--------------+
+Examinations table:
++------------+--------------+
+| student_id | subject_name |
++------------+--------------+
+| 1          | Math         |
+| 1          | Physics      |
+| 1          | Programming  |
+| 2          | Programming  |
+| 1          | Physics      |
+| 1          | Math         |
+| 13         | Math         |
+| 13         | Programming  |
+| 13         | Physics      |
+| 2          | Math         |
+| 1          | Math         |
++------------+--------------+
+Output: 
++------------+--------------+--------------+----------------+
+| student_id | student_name | subject_name | attended_exams |
++------------+--------------+--------------+----------------+
+| 1          | Alice        | Math         | 3              |
+| 1          | Alice        | Physics      | 2              |
+| 1          | Alice        | Programming  | 1              |
+| 2          | Bob          | Math         | 1              |
+| 2          | Bob          | Physics      | 0              |
+| 2          | Bob          | Programming  | 1              |
+| 6          | Alex         | Math         | 0              |
+| 6          | Alex         | Physics      | 0              |
+| 6          | Alex         | Programming  | 0              |
+| 13         | John         | Math         | 1              |
+| 13         | John         | Physics      | 1              |
+| 13         | John         | Programming  | 1              |
++------------+--------------+--------------+----------------+
+
+Explanation: 
+The result table should contain all students and all subjects.
+Alice attended the Math exam 3 times, the Physics exam 2 times, and the Programming exam 1 time.
+Bob attended the Math exam 1 time, the Programming exam 1 time, and did not attend the Physics exam.
+Alex did not attend any exams.
+John attended the Math exam 1 time, the Physics exam 1 time, and the Programming exam 1 time.
+
+
+*/
+
+====================================================================================================================================================
+
+Ans => 
+
+SELECT  S.student_id,S.student_name,Sub.subject_name,COUNT(E.subject_name) AS attended_exams
+FROM Students S CROSS JOIN Subjects Sub LEFT JOIN Examinations E
+ON S.student_id = E.student_id
+AND Sub.subject_name = E.subject_name
+GROUP BY S.student_id,S.student_name,Sub.subject_name
+ORDER BY S.student_id,Sub.subject_name;
+
+
+====================================================================================================================================================
+
+
+🔑 Key Insights
+===============
+Cross Join ensures all student–subject pairs exist.
+Left Join keeps unmatched pairs with zero counts.
+Group By is essential for correct aggregation.
+Count function handles duplicates automatically.
+
+
+🛠️ SQL Solution Approach
+=========================
+1) Cross Join Students and Subjects
+Ensures every student–subject pair exists in the result.
+Example: Alice × {Math, Physics, Programming}.
+
+2) Left Join with Examinations
+Match pairs with actual exam records.
+Use LEFT JOIN so missing records still appear (with count = 0).
+
+3) Aggregate with COUNT()
+Count how many times each student attended each subject exam.
+Group by student_id, student_name, subject_name.
+
+====================================================================================================================================================
+
+📖 Definition
+===============
+A CROSS JOIN in SQL combines every row from one table with every row from another table.
+It’s also called a Cartesian join because the result is the Cartesian product of the two sets.
+
+Query
+======
+SELECT s.student_name, sub.subject_name
+FROM Students s
+CROSS JOIN Subjects sub;
+
+🧩 Example
+Imagine two tables:
+
+Students
+=========
+| student_id | student_name |
+| ---------- | ------------ |
+| 1          | Alice        |
+| 2          | Bob          |
+
+Subjects
+========
+| subject_name |
+| ------------ |
+| Math         |
+| Physics      |
+
+
+Output
+=======
+| student_name | subject_name |
+| ------------ |------------- |
+| Alice        | Math         |
+| Alice        | Physics      |
+| Bob          | Math         |
+| Bob          | Physics      |
+
+
+👉 Notice how every student is paired with every subject.
+
+🚀 Key Points
+===============
+No condition is needed in a CROSS JOIN.
+Result size = (rows in Table A) × (rows in Table B).
+Useful when you need all possible combinations (like student–subject pairs in LeetCode 1280).
+Often combined with LEFT JOIN and GROUP BY to count or filter results.
+
+🎯 Analogy
+============
+Think of it like making outfits:
+Table A = Shirts (Alice, Bob)
+Table B = Pants (Math, Physics)
+CROSS JOIN = Every shirt goes with every pant → all possible outfits.
+
+
+🏦 Real‑World Scenarios
+========================
+Banking Reports  
+================
+Suppose a bank wants to track how many times each customer has interacted with each type of service 
+(Loans, Credit Cards, Savings).
+
+Customers table → list of all customers.
+
+Services table → list of all services.
+
+CROSS JOIN → generates all possible customer–service pairs.
+
+Then, a LEFT JOIN with transactions shows how many times each customer used each service.
+👉 This ensures even unused services show up with a count of 0.
+
+
+Education Analytics  
+In universities, administrators want to know how many exams each student attended for each subject.
+
+Students × Subjects → CROSS JOIN.
+
+Join with Exam records → count attendance.
+👉 This is exactly the LeetCode 1280 Students and Examinations problem.
+
+
+Sales Dashboards  
+Retail companies often need to see sales per product per region.
+
+Products table × Regions table → CROSS JOIN.
+
+Join with Sales data → count or sum sales.
+👉 Helps identify gaps (e.g., products not sold in certain regions).
+
+
+
+
+🎯 Why It’s Useful
+====================
+Guarantees completeness: no missing combinations.
+Works as a baseline grid for reporting.
+Often paired with LEFT JOIN + COUNT/SUM to fill in zeros where activity didn’t happen.
+
+Think of CROSS JOIN as a framework builder: it lays out every possible combination, 
+and then you overlay real data to see what’s happening versus what’s missing.
+
+============================================================================================================================================
+
+ON Clause is not required in CROSS join?
+Exactly, Arjun — that’s one of the defining traits of a CROSS JOIN.
+
+🔑 Why ON Clause Isn’t Required
+In a CROSS JOIN, SQL doesn’t need a condition because the intent is to produce all possible combinations of 
+rows from both tables.
+
+The result is the Cartesian product:
+
+Rows in Table A
+×
+Rows in Table B
+That’s different from INNER JOIN or LEFT JOIN, where you must specify an ON clause to tell SQL how to match rows.
+
+👉 No ON clause needed — SQL automatically pairs every row from Students with every row from Subjects.
+
+🎯 Key Takeaway
+================
+CROSS JOIN → no ON clause required.
+INNER/LEFT/RIGHT JOIN → ON clause required to define matching logic.
+Use CROSS JOIN when you want all combinations, not just matched pairs.
+
+

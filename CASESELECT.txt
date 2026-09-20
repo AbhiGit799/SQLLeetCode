@@ -1,0 +1,10 @@
+
+In Oracle SQL, the CASE expression allows you to implement IF-THEN-ELSE conditional logic directly within your queries.
+
+
+
+
+
+
+
+

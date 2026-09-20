@@ -1,0 +1,45 @@
+183. Customers Who Never Order
+===============================
+
+📝 Problem Recap
+=================
+Table: Customers
+id, name
+
+Table: Orders
+id, customerId
+
+Task: Return the names of customers who never placed an order.
+
+Solution (Using NOT IN)
+
+/* Write your PL/SQL query statement below */
+
+select name as Customers from Customers WHERE id NOT IN (select customerId from Orders);
+
+==============================================================================================================================
+
+Solution
+=========
+
+WITHOUT JOINS
+==============
+select name as Customers from Customers WHERE id NOT IN (select customerId from Orders);
+
+
+Solution using JOINS
+=====================
+select name as Customers from Customers LEFT JOIN Orders ON Customers.id = Orders.customerId
+WHERE Orders.id IS NULL;
+
+
+
+
+
+
+
+
+
+
+
+

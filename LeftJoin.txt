@@ -1,0 +1,54 @@
+
+LEFT JOIN
+==========
+
+A SQL LEFT JOIN returns all rows from the left table and only the matching rows from the right table; 
+if no match exists, the right table’s columns are filled with NULL. This makes it useful when you want 
+to preserve every record from a primary table while optionally including related data. 
+
+
+🔑 How LEFT JOIN Works
+=======================
+Left table (primary): All rows are always included.
+Right table (secondary): Only rows that match the join condition are included.
+No match case: Columns from the right table show NULL.
+
+
+⚙️ When to Use LEFT JOIN
+===========================
+User profiles → Show all users, even if they lack optional details.
+Sales reports → Include all products, even those with zero sales.
+Data completeness checks → Identify records missing related entries.
+
+Syntax
+=======
+SELECT column_name(s) FROM table1 LEFT JOIN table2 ON table1.column_name = table2.column_name;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

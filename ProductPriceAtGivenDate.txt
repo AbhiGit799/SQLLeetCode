@@ -1,0 +1,147 @@
+/*
+
+Table: Products
+
++---------------+---------+
+| Column Name   | Type    |
++---------------+---------+
+| product_id    | int     |
+| new_price     | int     |
+| change_date   | date    |
++---------------+---------+
+(product_id, change_date) is the primary key (combination of columns with unique values) of this table.
+Each row of this table indicates that the price of some product was changed to a new price at some date.
+Initially, all products have price 10.
+
+Write a solution to find the prices of all products on the date 2019-08-16.
+
+Return the result table in any order.
+
+The result format is in the following example.
+
+ 
+
+Example 1:
+
+Input: 
+Products table:
++------------+-----------+-------------+
+| product_id | new_price | change_date |
++------------+-----------+-------------+
+| 1          | 20        | 2019-08-14  |
+| 2          | 50        | 2019-08-14  |
+| 1          | 30        | 2019-08-15  |
+| 1          | 35        | 2019-08-16  |
+| 2          | 65        | 2019-08-17  |
+| 3          | 20        | 2019-08-18  |
++------------+-----------+-------------+
+Output: 
++------------+-------+
+| product_id | price |
++------------+-------+
+| 2          | 50    |
+| 1          | 35    |
+| 3          | 10    |
++------------+-------+
+
+*/
+
+
+Solution
+*********
+WITH ranked_changes AS (
+    SELECT 
+        product_id,
+        new_price,
+        change_date,
+        ROW_NUMBER() OVER (
+            PARTITION BY product_id 
+            ORDER BY change_date DESC
+        ) AS rn
+    FROM Products
+    WHERE change_date <= DATE '2019-08-16'
+)
+SELECT 
+    p.product_id,
+    COALESCE(rc.new_price, 10) AS price
+FROM (SELECT DISTINCT product_id FROM Products) p
+LEFT JOIN ranked_changes rc
+    ON p.product_id = rc.product_id AND rc.rn = 1;
+
+=========================================================================================================================================
+
+
+This Common Table Expression (CTE) creates a temporary result set called ranked_changes.
+
+Inside it:
+
+For each product_id, we assign a row number (rn) based on the latest change_date (descending order).
+
+So rn = 1 means “the most recent price change before or on 2019‑08‑16.”
+
+After this step, ranked_changes looks like a mini table with columns:
+
+product_id, new_price, change_date, rn.
+
+🧩 Step 2: The Outer Query
+============================
+SELECT 
+    p.product_id,
+    COALESCE(rc.new_price, 10) AS price
+FROM (SELECT DISTINCT product_id FROM Products) p
+LEFT JOIN ranked_changes rc
+    ON p.product_id = rc.product_id AND rc.rn = 1;
+
+
+Here, we first build a list of all distinct products (p).
+
+Then we LEFT JOIN that list with the CTE (ranked_changes), but only where rn = 1.
+
+This ensures we only pick the latest valid price change for each product.
+
+The alias rc is simply the shorthand for the CTE ranked_changes.
+
+rc.new_price means “the latest price change for this product.”
+
+If no matching row exists (i.e., product had no changes before 2019‑08‑16), rc.new_price is NULL.
+
+That’s why we wrap it in COALESCE(rc.new_price, 10) → default back to the initial price of 10.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
