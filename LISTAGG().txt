@@ -1,0 +1,63 @@
+
+The LISTAGG() function in Oracle SQL is a powerful built-in tool used to 
+transform data from multiple rows into a single string of delimited values. 
+It is primarily used to denormalize row-level data into a clean, 
+comma-separated (or otherwise separated) list for reporting.
+
+
+1. Basic Syntax
+================
+The syntax requires the WITHIN GROUP clause to specify how the aggregated string should be ordered:
+
+LISTAGG(expression, 'delimiter') WITHIN GROUP (ORDER BY column_name)
+
+expression: The column or value you want to combine.
+
+'delimiter': The character or string used to separate the values (e.g., ',' or ', '). If omitted, it defaults to NULL.
+
+WITHIN GROUP (ORDER BY ...): Mandatory. Determines the alphabetical or numerical sorting order of the elements inside the final string.
+
+=================================================================================================================================================================
+
+SELECT department_id,
+       LISTAGG(FIRST_NAME, ', ') WITHIN GROUP (ORDER BY FIRST_NAME) AS employee_list
+FROM HR.EMPLOYEES
+GROUP BY department_id;
+
+
+=================================================================================================================================================================
+
+"DEPARTMENT_ID"	           "EMPLOYEE_LIST"
+10	                       "Jennifer"
+20	                       "Michael, Pat"
+30		                   "Alexander, Den, Guy, Karen, Shelli, Sigal"
+40	                  	   "Susan"
+50		  		           "Adam, Alana, Alexis, Anthony, Britney, Curtis"
+60		  		           "Alexander, Bruce, David, Diana, Valli"
+70		  		           "Hermann"
+80		   		           "Alberto, Allan, Alyssa, Amit, Charles, Christopher"
+90		   		           "Lex, Neena, Steven"
+100		   		           "Daniel, Ismael, John, Jose Manuel, Luis, Nancy"
+110		   		           "Shelley, William"
+(null)		               "Kimberely"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
