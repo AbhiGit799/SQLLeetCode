@@ -1,0 +1,101 @@
+
+For Oracle SQL, this is a simple GROUP BY + HAVING problem.
+
+Important: WHERE vs HAVING
+
+Here we use HAVING, not WHERE, because COUNT() is an aggregate function.
+
+GROUP BY email
+HAVING COUNT(email) > 1
+
+Think:
+
+WHERE → filters rows before grouping
+HAVING → filters groups after grouping
+
+======================================================================================================================================
+
+Yes. 👍 GROUP BY + HAVING COUNT(*) > 1 is one of the most common ways to find duplicate values in SQL.
+
+
+General pattern
+SELECT column_name
+FROM table_name
+GROUP BY column_name
+HAVING COUNT(*) > 1;
+
+For example, to find duplicate emails:
+
+SELECT email
+FROM Person
+GROUP BY email
+HAVING COUNT(*) > 1;
+
+======================================================================================================================================
+
+
+But there are different meanings of "display duplicates"
+
+
+1. Find which values are duplicated
+
+Use:
+
+SELECT email
+FROM Person
+GROUP BY email
+HAVING COUNT(*) > 1;
+
+Result:
+
+a@gmail.com
+b@gmail.com
+
+
+2. Find the actual duplicate rows
+
+If you want all rows that contain duplicated emails, you can use:
+
+SELECT *
+FROM Person
+WHERE email IN (
+    SELECT email
+    FROM Person
+    GROUP BY email
+    HAVING COUNT(*) > 1
+);
+
+For example:
+
+id   email
+1    a@gmail.com
+2    b@gmail.com
+3    a@gmail.com
+
+Result:
+
+id   email
+1    a@gmail.com
+3    a@gmail.com
+3. Find duplicates but keep one record
+
+This is a different problem. For example, delete duplicates while keeping the smallest id. 
+Then we usually use ROW_NUMBER() or Oracle's ROWID, depending on the requirement.
+
+Easy interview rule to remember
+Requirement	Common approach
+Find duplicate values	GROUP BY + HAVING COUNT(*) > 1
+Find all rows having duplicate values	WHERE ... IN (GROUP BY + HAVING)
+Number/rank duplicate rows	ROW_NUMBER()
+Delete duplicates while keeping one	ROW_NUMBER() / ROWID
+
+So yes, whenever you see "find duplicate values", your first thought should be:
+
+
+
+
+
+
+
+
+
