@@ -1,0 +1,623 @@
+/*
+
+262. Trips and Users
+
+Table: Trips
+
++-------------+----------+
+| Column Name | Type     |
++-------------+----------+
+| id          | int      |
+| client_id   | int      |
+| driver_id   | int      |
+| city_id     | int      |
+| status      | enum     |
+| request_at  | varchar  |     
++-------------+----------+
+id is the primary key (column with unique values) for this table.
+The table holds all taxi trips. Each trip has a unique id, while client_id and driver_id are foreign keys to the users_id at the Users table.
+Status is an ENUM (category) type of ('completed', 'cancelled_by_driver', 'cancelled_by_client').
+
+Table: Users
+
++-------------+----------+
+| Column Name | Type     |
++-------------+----------+
+| users_id    | int      |
+| banned      | enum     |
+| role        | enum     |
++-------------+----------+
+users_id is the primary key (column with unique values) for this table.
+The table holds all users. Each user has a unique users_id, and role is an ENUM type of ('client', 'driver', 'partner').
+banned is an ENUM (category) type of ('Yes', 'No').
+
+The cancellation rate is computed by dividing the number of canceled (by client or driver) requests with unbanned users by the total number of requests with unbanned users on that day.
+
+Write a solution to find the cancellation rate of requests with unbanned users (both client and driver must not be banned) each day between "2013-10-01" and "2013-10-03" with at least one trip. Round Cancellation Rate to two decimal points.
+
+Return the result table in any order.
+
+The result format is in the following example.
+
+ 
+
+Example 1:
+
+Input: 
+Trips table:
++----+-----------+-----------+---------+---------------------+------------+
+| id | client_id | driver_id | city_id | status              | request_at |
++----+-----------+-----------+---------+---------------------+------------+
+| 1  | 1         | 10        | 1       | completed           | 2013-10-01 |
+| 2  | 2         | 11        | 1       | cancelled_by_driver | 2013-10-01 |
+| 3  | 3         | 12        | 6       | completed           | 2013-10-01 |
+| 4  | 4         | 13        | 6       | cancelled_by_client | 2013-10-01 |
+| 5  | 1         | 10        | 1       | completed           | 2013-10-02 |
+| 6  | 2         | 11        | 6       | completed           | 2013-10-02 |
+| 7  | 3         | 12        | 6       | completed           | 2013-10-02 |
+| 8  | 2         | 12        | 12      | completed           | 2013-10-03 |
+| 9  | 3         | 10        | 12      | completed           | 2013-10-03 |
+| 10 | 4         | 13        | 12      | cancelled_by_driver | 2013-10-03 |
++----+-----------+-----------+---------+---------------------+------------+
+Users table:
++----------+--------+--------+
+| users_id | banned | role   |
++----------+--------+--------+
+| 1        | No     | client |
+| 2        | Yes    | client |
+| 3        | No     | client |
+| 4        | No     | client |
+| 10       | No     | driver |
+| 11       | No     | driver |
+| 12       | No     | driver |
+| 13       | No     | driver |
++----------+--------+--------+
+Output: 
++------------+-------------------+
+| Day        | Cancellation Rate |
++------------+-------------------+
+| 2013-10-01 | 0.33              |
+| 2013-10-02 | 0.00              |
+| 2013-10-03 | 0.50              |
++------------+-------------------+
+
+
+Explanation: 
+
+On 2013-10-01:
+  - There were 4 requests in total, 2 of which were canceled.
+  - However, the request with Id=2 was made by a banned client (User_Id=2), so it is ignored in the calculation.
+  - Hence there are 3 unbanned requests in total, 1 of which was canceled.
+  - The Cancellation Rate is (1 / 3) = 0.33
+
+On 2013-10-02:
+  - There were 3 requests in total, 0 of which were canceled.
+  - The request with Id=6 was made by a banned client, so it is ignored.
+  - Hence there are 2 unbanned requests in total, 0 of which were canceled.
+  - The Cancellation Rate is (0 / 2) = 0.00
+
+On 2013-10-03:
+  - There were 3 requests in total, 1 of which was canceled.
+  - The request with Id=8 was made by a banned client, so it is ignored.
+  - Hence there are 2 unbanned request in total, 1 of which were canceled.
+  - The Cancellation Rate is (1 / 2) = 0.50
+
+
+*/
+
+
+/*
+
+We used an INNER JOIN.
+
+In SQL, when you write simply:
+
+JOIN
+
+it means:
+
+INNER JOIN
+
+*/
+
+
+/*
+
+we need to connect Trips with Users twice:
+
+once for the client_id
+once for the driver_id
+
+Because the condition says both client and driver must be unbanned.
+
+
+Step 1: Get only trips where both users are unbanned
+
+We can use two JOINs:
+
+SELECT t.*
+FROM Trips t
+JOIN Users c
+    ON t.client_id = c.users_id
+JOIN Users d
+    ON t.driver_id = d.users_id
+WHERE c.banned = 'No'
+  AND d.banned = 'No';
+
+Here:
+
+Trips.client_id  → Users.users_id   (client)
+Trips.driver_id  → Users.users_id   (driver)
+
+So we use Users twice with aliases c and d.
+
+*/
+
+
+
+
+SELECT
+    t.request_at AS Day,
+    ROUND(
+        SUM(
+            CASE
+                WHEN t.status IN ('cancelled_by_client', 'cancelled_by_driver')
+                THEN 1
+                ELSE 0
+            END
+        ) / COUNT(*),
+        2
+    ) AS `Cancellation Rate`
+FROM Trips t
+JOIN Users c
+    ON t.client_id = c.users_id
+JOIN Users d
+    ON t.driver_id = d.users_id
+WHERE c.banned = 'No'
+  AND d.banned = 'No'
+  AND t.request_at BETWEEN '2013-10-01' AND '2013-10-03'
+GROUP BY t.request_at;
+
+
+
+/*
+
+The thought process you should learn
+
+For SQL interview questions, I recommend using this checklist:
+
+
+| Question                                   | What we identify here             |
+| ------------------------------------------ | --------------------------------- |
+| **What is the main table?**                | `Trips`                           |
+| **What information do I need?**            | Trip status, client, driver, date |
+| **Where is that information?**             | `Trips` + `Users`                 |
+| **Do I need another table?**               | Yes, `Users`                      |
+| **How are they related?**                  | `client_id` and `driver_id`       |
+| **Does the same table get used for both?** | Yes, `Users`                      |
+| **How many JOINs?**                        | 2                                 |
+| **Which JOIN?**                            | `INNER JOIN`                      |
+| **What do I filter?**                      | Both users `banned = 'No'`        |
+| **What do I group by?**                    | `request_at`                      |
+| **What do I count?**                       | Cancelled trips and total trips   |
+| **What calculation?**                      | cancelled / total                 |
+| **What formatting?**                       | `ROUND(..., 2)`                   |
+
+
+The key trick
+***************
+Whenever you see a table like:
+
+Trips
+---------
+client_id
+driver_id
+
+and both IDs refer to:
+
+Users
+---------
+users_id
+
+think:
+
+"The same table is being referenced for two different roles, so I'll join it twice using two aliases."
+
+*/
+
+
+
+/*
+
+This is the **most important skill in SQL problems**: don't start by writing SQL. First identify **what information is needed from which table**.
+
+Let's derive this problem step by step.
+
+## 1. Start with the requirement
+
+The key sentence is:
+
+> **both client and driver must not be banned**
+
+Immediately ask:
+
+**Where do I find whether a client/driver is banned?**
+
+Look at the tables:
+
+### `Trips`
+
+```text
+client_id
+driver_id
+```
+
+It tells us **who** the client and driver are.
+
+### `Users`
+
+```text
+users_id
+banned
+role
+```
+
+It tells us whether a particular user is banned.
+
+So we need to connect:
+
+```text
+Trips.client_id  → Users.users_id
+Trips.driver_id  → Users.users_id
+```
+
+And notice something important:
+
+**Both `client_id` and `driver_id` point to the same `Users` table.**
+
+That's how we know we need to use `Users` **twice**.
+
+---
+
+# 2. Why two JOINs?
+====================
+Imagine one trip:
+
+```text
+Trips
+
+id   client_id   driver_id
+1       1           10
+```
+
+We need to check:
+
+```text
+Is client 1 banned?
+Is driver 10 banned?
+```
+
+Both answers are in `Users`:
+
+```text
+Users
+
+users_id   banned
+1          No
+10         No
+```
+
+So conceptually:
+
+```text
+                  Users
+                 /     \
+                /       \
+        client_id     driver_id
+           ↓             ↓
+        client          driver
+```
+
+Therefore:
+
+```sql
+INNER JOIN Users c
+    ON t.client_id = c.users_id
+
+INNER JOIN Users d
+    ON t.driver_id = d.users_id
+```
+
+We give `Users` two aliases:
+
+```text
+c = client
+d = driver
+```
+
+This allows us to ask:
+
+```sql
+c.banned = 'No'   -- client's status
+d.banned = 'No'   -- driver's status
+```
+
+---
+
+# 3. How did we know it is INNER JOIN?
+
+Now ask:
+
+> Do we want trips where there is no matching user?
+
+No.
+
+We need a valid client and a valid driver whose user records exist.
+
+That's exactly what `INNER JOIN` does:
+
+```text
+Trips                    Users
+  │                         │
+  └──── matching rows ──────┘
+              ↓
+       keep matching rows
+```
+
+So:
+
+```sql
+INNER JOIN Users c
+```
+
+and
+
+```sql
+INNER JOIN Users d
+```
+
+---
+
+# 4. Now solve the problem in pieces
+
+Don't try to write the entire query at once.
+
+### Requirement #1
+
+> Both client and driver must not be banned.
+
+First write:
+
+```sql
+SELECT t.*
+FROM Trips t
+INNER JOIN Users c
+    ON t.client_id = c.users_id
+INNER JOIN Users d
+    ON t.driver_id = d.users_id
+WHERE c.banned = 'No'
+  AND d.banned = 'No';
+```
+
+At this point we have solved the **filtering problem**.
+
+---
+
+# 5. Requirement #2
+
+> Find cancellation rate each day.
+
+We need:
+
+```text
+canceled trips
+-----------------
+total trips
+```
+
+So we need:
+
+```sql
+GROUP BY t.request_at
+```
+
+Because we want one result per day.
+
+---
+
+# 6. How do we count cancelled trips?
+
+We could use:
+
+```sql
+CASE
+    WHEN status IN ('cancelled_by_client', 'cancelled_by_driver')
+    THEN 1
+    ELSE 0
+END
+```
+
+For example:
+
+```text
+status                    CASE result
+
+completed                    0
+cancelled_by_client          1
+cancelled_by_driver          1
+```
+
+Then:
+
+```sql
+SUM(
+    CASE
+        WHEN t.status IN ('cancelled_by_client', 'cancelled_by_driver')
+        THEN 1
+        ELSE 0
+    END
+)
+```
+
+gives us the **number of cancelled trips**.
+
+---
+
+# 7. How do we count total trips?
+
+Simply:
+
+```sql
+COUNT(*)
+```
+
+So now:
+
+```text
+Cancellation Rate =
+       cancelled trips
+       ---------------
+        total trips
+```
+
+SQL:
+
+```sql
+SUM(CASE ... END) / COUNT(*)
+```
+
+---
+
+# 8. Add the date condition
+
+The question says:
+
+```text
+2013-10-01
+through
+2013-10-03
+```
+
+So:
+
+```sql
+WHERE t.request_at BETWEEN '2013-10-01' AND '2013-10-03'
+```
+
+In Oracle, since `request_at` is a `VARCHAR`, this works for these ISO-formatted strings, though storing dates as `DATE` would generally be preferable.
+
+---
+
+# 9. Put everything together
+
+Now the final structure becomes easy:
+
+```sql
+SELECT
+    t.request_at AS Day,
+
+    ROUND(
+        SUM(
+            CASE
+                WHEN t.status IN
+                    ('cancelled_by_client', 'cancelled_by_driver')
+                THEN 1
+                ELSE 0
+            END
+        ) / COUNT(*),
+        2
+    ) AS "Cancellation Rate"
+
+FROM Trips t
+
+INNER JOIN Users c
+    ON t.client_id = c.users_id
+
+INNER JOIN Users d
+    ON t.driver_id = d.users_id
+
+WHERE c.banned = 'No'
+  AND d.banned = 'No'
+  AND t.request_at BETWEEN '2013-10-01' AND '2013-10-03'
+
+GROUP BY t.request_at;
+```
+
+---
+
+## The thought process you should learn
+
+For SQL interview questions, I recommend using this checklist:
+
+| Question                                   | What we identify here             |
+| ------------------------------------------ | --------------------------------- |
+| **What is the main table?**                | `Trips`                           |
+| **What information do I need?**            | Trip status, client, driver, date |
+| **Where is that information?**             | `Trips` + `Users`                 |
+| **Do I need another table?**               | Yes, `Users`                      |
+| **How are they related?**                  | `client_id` and `driver_id`       |
+| **Does the same table get used for both?** | Yes, `Users`                      |
+| **How many JOINs?**                        | 2                                 |
+| **Which JOIN?**                            | `INNER JOIN`                      |
+| **What do I filter?**                      | Both users `banned = 'No'`        |
+| **What do I group by?**                    | `request_at`                      |
+| **What do I count?**                       | Cancelled trips and total trips   |
+| **What calculation?**                      | cancelled / total                 |
+| **What formatting?**                       | `ROUND(..., 2)`                   |
+
+### The key trick
+
+Whenever you see a table like:
+
+```text
+Trips
+---------
+client_id
+driver_id
+```
+
+and both IDs refer to:
+
+```text
+Users
+---------
+users_id
+```
+
+think:
+
+> **"The same table is being referenced for two different roles, so I'll join it twice using two aliases."**
+
+That's a very common SQL interview pattern.
+
+
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

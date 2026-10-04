@@ -1,3 +1,355 @@
+UNION ALL in Oracle SQL is used to combine the results of two or more SELECT queries into one result set.
+
+The easiest way to think about it:
+
+UNION ALL = put the rows from Query 2 underneath the rows from Query 1, without removing duplicates.
+
+Simple example
+
+Suppose we have:
+
+Employee_India
+
+id	name
+1	Amit
+2	Rahul
+
+Employee_USA
+
+id	name
+3	John
+4	David
+
+Query:
+
+SELECT id, name
+FROM Employee_India
+
+UNION ALL
+
+SELECT id, name
+FROM Employee_USA;
+
+Result:
+
+id	name
+1	Amit
+2	Rahul
+3	John
+4	David
+
+So essentially:
+
+Query 1
+   ↓
+Rows
+   +
+Query 2
+   ↓
+Rows
+   =
+Combined result
+
+
+UNION ALL vs UNION
+====================
+This is very important for interviews.
+
+Suppose:
+
+SELECT name FROM Employee_India
+
+UNION ALL
+
+SELECT name FROM Employee_USA;
+
+If the data is:
+
+India
+
+Amit
+Rahul
+John
+
+USA
+
+John
+David
+UNION ALL
+Amit
+Rahul
+John
+John
+David
+
+It keeps duplicates.
+
+UNION
+Amit
+Rahul
+John
+David
+
+It removes duplicates.
+
+So:
+
+                      UNION	    UNION ALL
+Combines rows	      ✅	        ✅
+Removes duplicates	  ✅	        ❌
+Keeps duplicates	  ❌	        ✅
+Generally faster	  ❌	        ✅
+
+
+Why is UNION ALL generally faster?
+===================================
+Because Oracle doesn't have to do the additional work of identifying and removing duplicate rows.
+
+Important rule: Same number of columns
+========================================
+This works:
+
+SELECT id, name
+FROM Employee_India
+
+UNION ALL
+
+SELECT id, name
+FROM Employee_USA;
+
+Both queries return 2 columns.
+
+This doesn't work:
+
+SELECT id, name
+FROM Employee_India
+
+UNION ALL
+
+SELECT id, name, salary
+FROM Employee_USA;
+
+Because the first query returns 2 columns and the second returns 3.
+
+Data types should be compatible
+
+For example:
+
+SELECT id
+FROM Employee_India
+
+UNION ALL
+
+SELECT employee_id
+FROM Employee_USA;
+
+This is okay if both are compatible numeric types.
+
+But something like:
+
+SELECT name
+FROM Employee_India
+
+UNION ALL
+
+SELECT salary
+FROM Employee_USA;
+
+is generally invalid because you're trying to combine incompatible data types.
+
+ORDER BY with UNION ALL
+
+If you want to sort the final combined result, put ORDER BY at the end:
+
+SELECT id, name
+FROM Employee_India
+
+UNION ALL
+
+SELECT id, name
+FROM Employee_USA
+
+ORDER BY name;
+
+Think:
+
+SELECT 1
+   ↓
+UNION ALL
+   ↓
+SELECT 2
+   ↓
+Combined result
+   ↓
+ORDER BY
+
+Not:
+
+SELECT id, name
+FROM Employee_India
+ORDER BY name
+
+UNION ALL
+
+SELECT id, name
+FROM Employee_USA;
+
+
+When do we use UNION ALL?
+==========================
+A common real-world situation is combining data from multiple tables.
+
+For example:
+
+SELECT customer_id, order_date, amount
+FROM Orders_2025
+
+UNION ALL
+===========
+SELECT customer_id, order_date, amount
+FROM Orders_2026;
+
+You want all orders from both years, including the possibility that identical rows exist.
+
+That's a good case for UNION ALL.
+
+Interview shortcut
+==================
+Remember:
+
+UNION = combine + remove duplicates
+UNION ALL = combine + keep duplicates
+
+And one more important distinction:
+
+UNION ALL adds rows vertically. JOIN combines columns horizontally.
+
+For example:
+
+UNION ALL                  JOIN
+
+Table A                    Table A
+id name                    id name
+1  Amit                    1  Amit
+2  Raj                      ↓
+     +                     Table B
+Table B                    id salary
+3  John                    1  50000
+4  Sam
+
+====================================================================================================================================
+
+UNION ALL vs JOIN
+
+The easiest way to remember:
+
+UNION ALL → combines rows
+JOIN → combines columns
+
+
+1. UNION ALL — combine rows vertically
+
+Suppose we have two tables:
+
+Employee_India
+
+id	name
+1	Amit
+2	Rahul
+
+Employee_USA
+
+id	name
+3	John
+4	David
+
+
+Using:
+
+SELECT id, name
+FROM Employee_India
+
+UNION ALL
+
+SELECT id, name
+FROM Employee_USA;
+
+id	name
+1	Amit
+2	Rahul
+3	John
+4	David
+
+Think:
+
+Employee_India
+     ↓
+     ↓
+     +
+     ↓
+Employee_USA
+
+We're adding more rows.
+
+===============================================================================================================================================
+
+2. JOIN — combine columns
+
+Now suppose we have:
+
+Employee
+
+id	name
+1	Amit
+2	Rahul
+
+Salary
+
+employee_id	salary
+1	50000
+2	60000
+
+We want:
+
+id	name	salary
+1	Amit	50000
+2	Rahul	60000
+
+Use a JOIN:
+
+SELECT e.id,
+       e.name,
+       s.salary
+FROM Employee e
+JOIN Salary s
+    ON e.id = s.employee_id;
+
+Here we're combining columns from different tables based on a relationship.
+
+==============================================================================================================================================================================
+
+UNION ALL vs JOIN
+=================
+
+| Feature              | UNION ALL                              | JOIN                                  |
+|----------------------|----------------------------------------|---------------------------------------|
+| Purpose              | Combines rows from multiple queries    | Combines columns from related tables  |
+| Direction            | Vertical                               | Horizontal                            |
+| Main focus           | Adds more rows                         | Adds more columns                     |
+| Tables               | Usually similar structure              | Can have different structures         |
+| Number of columns    | SELECTs must have same number          | No such requirement                   |
+| Column data types    | Corresponding columns must be          | JOIN columns should have compatible   |
+|                      | compatible                             | values/types                          |
+| Duplicate rows       | Keeps duplicates                       | Depends on JOIN/data                  |
+| Matching condition   | No ON condition required               | Usually uses ON condition             |
+| Common use           | Combine similar data from tables       | Get related information               |
+| Example              | Sales_2025 + Sales_2026                | Employee + Department                 |
+| SQL keyword          | UNION ALL                              | JOIN / INNER JOIN / LEFT JOIN etc.    |
+| Result               | More rows                              | More columns                          |
+
+
+
+
 
 
 

@@ -1,7 +1,142 @@
 
 In Oracle SQL, the CASE expression allows you to implement IF-THEN-ELSE conditional logic directly within your queries.
 
+In Oracle SQL, use a CASE statement/expression when you need conditional logic — basically, "if this condition, return this; otherwise, return that."
 
+Think of it as SQL's version of if / else if / else.
+
+1. Convert one value to another
+
+This is exactly your Swap Salary example:
+
+SELECT id,
+       name,
+       CASE sex
+           WHEN 'f' THEN 'm'
+           WHEN 'm' THEN 'f'
+       END AS sex,
+       salary
+FROM Salary;
+
+Meaning:
+
+if sex = 'f' → 'm'
+if sex = 'm' → 'f'
+
+This is called a simple CASE because you're comparing one column against values.
+
+2. Use conditions with WHEN
+
+Suppose you want to categorize salaries:
+
+SELECT name,
+       salary,
+       CASE
+           WHEN salary >= 100000 THEN 'High'
+           WHEN salary >= 50000  THEN 'Medium'
+           ELSE 'Low'
+       END AS salary_category
+FROM Employee;
+
+Result could be:
+
+Name     Salary    Salary_Category
+John     120000    High
+Mike      70000    Medium
+Sam       30000    Low
+
+Here you're using conditions, so this is a searched CASE.
+
+3. Replace NULL with a value
+SELECT name,
+       CASE
+           WHEN department IS NULL THEN 'No Department'
+           ELSE department
+       END AS department
+FROM Employee;
+4. Create custom labels
+
+For example, based on employee age:
+
+SELECT name,
+       age,
+       CASE
+           WHEN age < 18 THEN 'Minor'
+           WHEN age BETWEEN 18 AND 60 THEN 'Adult'
+           ELSE 'Senior'
+       END AS age_group
+FROM Employee;
+5. Use CASE in ORDER BY
+
+You can control your own sorting logic.
+
+For example, put managers first:
+
+SELECT name, job
+FROM Employee
+ORDER BY CASE
+             WHEN job = 'MANAGER' THEN 1
+             WHEN job = 'ANALYST' THEN 2
+             ELSE 3
+         END;
+6. Use CASE inside aggregate functions
+
+This is very common in interviews.
+
+For example, count employees whose salary is greater than 50,000:
+
+SELECT
+    COUNT(CASE
+              WHEN salary > 50000 THEN 1
+          END) AS high_salary_count
+FROM Employee;
+
+Or calculate conditional salary totals:
+
+SELECT
+    SUM(CASE
+            WHEN department = 'IT' THEN salary
+            ELSE 0
+        END) AS it_salary
+FROM Employee;
+Two important CASE formats
+Simple CASE
+
+Use when comparing one column with specific values:
+
+CASE column
+    WHEN value1 THEN result1
+    WHEN value2 THEN result2
+    ELSE result3
+END
+
+Example:
+
+CASE sex
+    WHEN 'f' THEN 'Female'
+    WHEN 'm' THEN 'Male'
+END
+Searched CASE
+
+Use when you have conditions, such as >, <, BETWEEN, LIKE, etc.:
+
+CASE
+    WHEN condition1 THEN result1
+    WHEN condition2 THEN result2
+    ELSE result3
+END
+
+Example:
+
+CASE
+    WHEN salary >= 100000 THEN 'High'
+    WHEN salary >= 50000 THEN 'Medium'
+    ELSE 'Low'
+END
+Easy way to remember
+
+Simple CASE → "What is this value?"
+Searched CASE → "Does this condition match?"
 
 
 
