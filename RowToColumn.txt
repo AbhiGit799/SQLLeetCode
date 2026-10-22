@@ -1,0 +1,94 @@
+To convert rows to columns in Oracle SQL, 
+
+the most efficient and native method is the PIVOT operator 
+(available in Oracle 11g and later). 
+
+If you are working on an older version or need custom conditional logic, 
+you can use the MAX(DECODE(...)) or MAX(CASE WHEN...) approach.
+
+
+
+Method 1: Using the PIVOT Operator (Recommended)
+**************************************************
+The PIVOT clause requires three main elements: an aggregate function, 
+the column to pivot on, and the specific row values you want to turn into columns.
+
+⚠️ Important: Always use a subquery inside the FROM clause to select only the columns you need. 
+Oracle applies an implicit GROUP BY to all columns not specified inside the PIVOT clause, 
+which can lead to unexpected rows if you pass an entire table.
+
+
+SELECT * 
+FROM (
+    -- 1. Subquery: Select only the necessary columns
+    SELECT year, quarter, amount 
+    FROM sales
+)
+-- 2. Pivot clause: Define aggregate function and target values
+PIVOT (
+    SUM(amount) 
+    FOR quarter IN ('Q1' AS q1_sales, 'Q2' AS q2_sales)
+);
+
+
+General syntax of PIVOT
+=======================
+SELECT *
+FROM (
+    SELECT columns
+    FROM table_name
+)
+PIVOT (
+    aggregate_function(value_column)
+    FOR category_column IN (
+        'value1' AS column1,
+        'value2' AS column2
+    )
+);
+
+
+
+There are 3 important parts to understand:
+- FROM (...) — selects the source data that you want to pivot.
+- aggregate_function(value_column) — calculates the value for each new column, usually with SUM().
+- FOR category_column IN (...) — specifies which row values become columns.
+
+
+
+======================================================================================================================================================
+
+
+Method 2: Using MAX with DECODE or CASE (Traditional Method)
+**************************************************
+If you cannot use the native PIVOT function, you can combine an aggregate function like MAX or 
+SUM with a conditional expression to filter the row values into separate columns manually.
+
+SELECT 
+    year,
+    MAX(DECODE(quarter, 'Q1', amount)) AS q1_sales,
+    MAX(CASE WHEN quarter = 'Q2' THEN amount END) AS q2_sales
+FROM sales
+GROUP BY year
+ORDER BY year;
+
+
+
+
+Key Things to Keep in Mind
+***************************
+• Hardcoded Column Headers: Oracle SQL requires you 
+to explicitly state the literal row values inside the IN clause (e.g., 'Q1', 'Q2').
+
+
+• Dynamic Columns: If your row values change constantly and you cannot hardcode them, 
+you must either use PIVOT XML (which outputs data in an XML format) or build Dynamic 
+SQL using PL/SQL with LISTAGG to generate the query statement at runtime.
+
+• Multiple Aggregations: You can perform multiple aggregations simultaneously within a single 
+PIVOT statement (e.g., tracking both SUM(amount) and AVG(amount)), but you must provide unique 
+aliases for the aggregate functions to prevent naming conflicts.
+
+
+
+
+

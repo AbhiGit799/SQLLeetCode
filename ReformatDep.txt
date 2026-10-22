@@ -1,0 +1,101 @@
+/*
+
+LeetCode 1179 — Reformat Department Table using Oracle SQL concepts step by step.
+1. Understand the problem
+You are given a table named Department:
+
+id	revenue	month
+1	8000	Jan
+2	9000	Jan
+1	7000	Feb
+2	6000	Feb
+3	10000	Jan
+
+
+You need to convert the month values from rows into separate columns.
+
+Expected output:
+
+id	Jan_Revenue	    Feb_Revenue	   Mar_Revenue	...
+1	8000	        7000	         NULL	    ...
+2	9000	        6000	         NULL	    ...
+3	10000	        NULL	         NULL	    ...
+
+
+Notice:
+- Each department id appears only once.
+- Each month becomes a separate column.
+- If a department has no revenue for a month, the result is NULL.
+
+
+
+*/
+
+
+SELECT
+    id,
+    SUM(CASE WHEN month = 'Jan' THEN revenue END) AS Jan_Revenue,
+    SUM(CASE WHEN month = 'Feb' THEN revenue END) AS Feb_Revenue,
+    SUM(CASE WHEN month = 'Mar' THEN revenue END) AS Mar_Revenue,
+    SUM(CASE WHEN month = 'Apr' THEN revenue END) AS Apr_Revenue,
+    SUM(CASE WHEN month = 'May' THEN revenue END) AS May_Revenue,
+    SUM(CASE WHEN month = 'Jun' THEN revenue END) AS Jun_Revenue,
+    SUM(CASE WHEN month = 'Jul' THEN revenue END) AS Jul_Revenue,
+    SUM(CASE WHEN month = 'Aug' THEN revenue END) AS Aug_Revenue,
+    SUM(CASE WHEN month = 'Sep' THEN revenue END) AS Sep_Revenue,
+    SUM(CASE WHEN month = 'Oct' THEN revenue END) AS Oct_Revenue,
+    SUM(CASE WHEN month = 'Nov' THEN revenue END) AS Nov_Revenue,
+    SUM(CASE WHEN month = 'Dec' THEN revenue END) AS Dec_Revenue
+FROM Department
+GROUP BY id
+ORDER BY id;
+
+
+/*
+
+-- Another way to convert row into column 
+
+SELECT *
+FROM (
+    SELECT id, revenue, month
+    FROM Department
+)
+PIVOT (
+    SUM(revenue)
+    FOR month IN (
+        'Jan' AS Jan_Revenue,
+        'Feb' AS Feb_Revenue,
+        'Mar' AS Mar_Revenue
+    )
+)
+ORDER BY id;
+
+
+*/
+
+
+
+
+/*
+
+The general approach is:
+
+1. Identify the row values
+Example: Jan, Feb, Mar
+
+2. Create conditional expressions
+Use CASE WHEN for each value.
+
+3. Aggregate each expression
+Use SUM() and group by the department ID.
+
+
+4. Get one row per department
+Each month becomes a separate column.
+
+*/
+
+
+
+
+
