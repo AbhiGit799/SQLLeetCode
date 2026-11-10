@@ -1,0 +1,245 @@
+/*
+
+1873. Calculate Special Bonus
+
+Table: Employees
+
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| employee_id | int     |
+| name        | varchar |
+| salary      | int     |
++-------------+---------+
+employee_id is the primary key (column with unique values) for this table.
+Each row of this table indicates the employee ID, employee name, and salary.
+ 
+
+Write a solution to calculate the bonus of each employee. 
+The bonus of an employee is 100% of their salary if the ID of the employee is an odd number 
+and the employee's name does not start with the character 'M'. The bonus of an employee is 0 otherwise.
+
+Return the result table ordered by employee_id.
+
+The result format is in the following example.
+
+ 
+
+Example 1:
+
+Input: 
+Employees table:
++-------------+---------+--------+
+| employee_id | name    | salary |
++-------------+---------+--------+
+| 2           | Meir    | 3000   |
+| 3           | Michael | 3800   |
+| 7           | Addilyn | 7400   |
+| 8           | Juan    | 6100   |
+| 9           | Kannon  | 7700   |
++-------------+---------+--------+
+
+Output: 
++-------------+-------+
+| employee_id | bonus |
++-------------+-------+
+| 2           | 0     |
+| 3           | 0     |
+| 7           | 7400  |
+| 8           | 0     |
+| 9           | 7700  |
++-------------+-------+
+
+Explanation: 
+The employees with IDs 2 and 8 get 0 bonus because they have an even employee_id.
+The employee with ID 3 gets 0 bonus because their name starts with 'M'.
+The rest of the employees get a 100% bonus.
+
+*/
+
+
+
+SELECT
+    employee_id,
+    CASE
+        WHEN MOD(employee_id, 2) = 1
+             AND name NOT LIKE 'M%'
+        THEN salary
+        ELSE 0
+    END AS bonus
+FROM Employees
+ORDER BY employee_id;
+
+
+Optimized Query
+================
+
+
+SELECT
+    employee_id,
+    CASE
+        WHEN BITAND(employee_id, 1) = 1
+             AND name NOT LIKE 'M%'
+        THEN salary
+        ELSE 0
+    END AS bonus
+FROM Employees
+ORDER BY employee_id;
+
+
+
+/*
+
+
+What changed?
+
+Instead of:
+MOD(employee_id, 2) = 1
+
+
+I used:
+BITAND(employee_id, 1) = 1
+
+BITAND checks whether the last binary bit is 1, which identifies odd numbers.
+
+Important: Your original MOD() solution is also logically correct. BITAND() is an alternative, not a guaranteed fix for the TLE.
+
+
+One important SQL concept to remember:
+
+Function	               Purpose
+MOD(n, 2) = 1	           Checks odd numbers
+BITAND(n, 1) = 1	       Checks odd numbers using bitwise logic
+BITAND(n, 1) = 0	       Checks even numbers
+
+
+My recommendation: Learn both approaches, but understand MOD() first. BITAND() is a useful Oracle SQL technique.
+
+
+*/
+
+
+
+/*
+
+1. What is BITAND()?
+
+BITAND() is an Oracle SQL function that performs a bitwise AND operation between two numbers.
+
+In simple words, it compares two numbers at the binary level (0s and 1s).
+
+Syntax:
+BITAND(number1, number2)
+
+It compares the binary bits of both numbers.
+
+2. First understand binary numbers
+Computers represent numbers using binary (0 and 1).
+
+For example:
+Decimal	Binary
+1	001
+2	010
+3	011
+4	100
+5	101
+6	110
+7	111
+
+
+Let's understand how BITAND() works.
+
+
+3. How does BITAND() work?
+The AND operation follows these rules:
+Bit 1	Bit 2	Result
+0	0	0
+0	1	0
+1	0	0
+1	1	1
+
+Only when both bits are 1, the result is 1.
+
+
+Example 1: BITAND(5, 1)
+First, convert both numbers into binary:
+
+5 = 101
+1 = 001
+
+
+Now compare each position:
+    101
+AND 001
+-------
+    001
+
+
+The result is 001, which is decimal 1.
+
+Therefore:
+SELECT BITAND(5, 1) FROM dual;
+
+
+Result: 1
+Example 2: BITAND(6, 1)
+Convert into binary:
+6 = 110
+1 = 001
+
+
+Compare:
+    110
+AND 001
+-------
+    000
+
+
+The result is 000, which is decimal 0.
+
+Therefore:
+SELECT BITAND(6, 1) FROM dual;
+
+
+Result: 0
+4. Now the interesting part: How does BITAND identify odd and even numbers?
+Look carefully at the binary representations:
+Number	Binary	Last bit
+2	010	0
+3	011	1
+4	100	0
+5	101	1
+6	110	0
+7	111	1
+8	1000	0
+
+Notice something?
+- Every even number has 0 as its last binary bit.
+- Every odd number has 1 as its last binary bit.
+Now remember that we are comparing with binary 1:
+1 = 001
+
+
+This means BITAND(number, 1) checks the last bit.
+
+Therefore:
+-- Odd numbers
+BITAND(employee_id, 1) = 1
+
+-- Even numbers
+BITAND(employee_id, 1) = 0
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
